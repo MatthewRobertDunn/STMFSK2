@@ -4,7 +4,7 @@
 //How many clocks between bits. This corresponds to 'chunks' of our signal.
 #define CLOCKS_PER_BIT 4
 #define START_BIT  0
-#define LAST_DATA_BIT  8
+#define STOP_BIT  9
 
 volatile int currentState = 0; //The current state of the decoder
 
@@ -16,6 +16,12 @@ volatile char currentByte = 0; //The byte we are building up
 
 void onBitReceived(bool bit, int clock)
 {
+    if(clock < bitClock)
+    {
+       //It's not yet time to read
+        return;
+    }
+    
     if(currentState == START_BIT && bit == 0)
     {
         return; //looking for start bit, didn't find it, leave.
@@ -39,29 +45,22 @@ void onBitReceived(bool bit, int clock)
         return;
     }
 
-    if(clock < bitClock)
-    {
-       //It's not yet time to read our databit.
-        return;
-    }
-
     //Time to read a databit.
-    if(currentState > START_BIT)
+    if(currentState > START_BIT && currentState < STOP_BIT)
     {
         currentByte = currentByte << 1; //make room for our new bit
-        currentByte = currentByte || bit; //Set incoming bit to LSB
-
-        if(currentState == LAST_DATA_BIT)   //Did we just read our last bit?
-        {
-                Serial.write(currentByte);  //print result to debug
-                currentState = START_BIT;  //Back to looking for our start bit.
-                return;
-        }
+        currentByte = currentByte | bit; //Set incoming bit to LSB
+        currentState++;
     }
 
-    //progress to reading the next bit
-    bitClock += CLOCKS_PER_BIT;
-    currentState++;    
+    if(currentState == STOP_BIT && bit == 0)
+    {
+      Serial.print((int)currentByte);  //print result to debug
+      Serial.write(",");
+      currentState = START_BIT;  //Back to looking for our start bit.
+    }
+
+    bitClock = clock + CLOCKS_PER_BIT;
 }
 
 #endif
