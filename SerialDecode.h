@@ -57,8 +57,7 @@ void onBitReceived(bool bit, int clock)
 
     if(currentState == STOP_BIT && bit == 0)
     {
-      Serial.print((int)currentByte);  //print result to debug
-      Serial.write(",");
+      Serial.write(currentByte);  //print result to debug
       currentState = START_BIT;  //Back to looking for our start bit.
     }
 }
