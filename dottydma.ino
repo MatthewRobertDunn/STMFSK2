@@ -31,13 +31,11 @@ void setup() {
   Serial.begin(115200);
   Serial.println("START");  
   SetupBasisVectors();
-  delay(10000);
-
+  delay(1000);
   Serial.println("Sine Vector");
   printVector(VectorOneSine, VectorOneLength);
   Serial.println("Cosine Vector");
   printVector(VectorOneCosine, VectorOneLength);
-
   SetupDma();
 }
 

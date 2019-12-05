@@ -16,12 +16,6 @@ volatile char currentByte = 0; //The byte we are building up
 
 void onBitReceived(bool bit, int clock)
 {
-    if(clock < bitClock)
-    {
-       //It's not yet time to read
-        return;
-    }
-    
     if(currentState == START_BIT && bit == 0)
     {
         return; //looking for start bit, didn't find it, leave.
@@ -30,11 +24,17 @@ void onBitReceived(bool bit, int clock)
     if(currentState == START_BIT && bit == 1) //looking for start bit, we did find it, yay.
     {
         //set the current start bit clock to the next data bit
-        bitClock = clock + CLOCKS_PER_BIT;
+        bitClock = clock + CLOCKS_PER_BIT + (CLOCKS_PER_BIT/2);
         //reset our currentByte to 0
         currentByte = 0;
         //increment current state
         currentState++;
+        return;
+    }
+
+    if(clock < bitClock)
+    {
+       //It's not yet time to read
         return;
     }
 
@@ -45,12 +45,14 @@ void onBitReceived(bool bit, int clock)
         return;
     }
 
-    //Time to read a databit.
+    //Read a databit.
     if(currentState > START_BIT && currentState < STOP_BIT)
     {
         currentByte = currentByte << 1; //make room for our new bit
         currentByte = currentByte | bit; //Set incoming bit to LSB
+        bitClock = clock + CLOCKS_PER_BIT;
         currentState++;
+        return;
     }
 
     if(currentState == STOP_BIT && bit == 0)
@@ -59,8 +61,6 @@ void onBitReceived(bool bit, int clock)
       Serial.write(",");
       currentState = START_BIT;  //Back to looking for our start bit.
     }
-
-    bitClock = clock + CLOCKS_PER_BIT;
 }
 
 #endif
