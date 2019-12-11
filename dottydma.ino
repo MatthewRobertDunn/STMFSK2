@@ -10,12 +10,17 @@
 
 #define VectorOneLength FrequencyOneWavelength * VectorOnePeriods
 
-#include "DotProduct.h"
+#define BlueLed PC13
+#define RedLed PA1
 
+#include "DotProduct.h"
 #include "Dma.h"
+#include "LiquidCrystal_I2C.h"
 
 #include <FixedPoints.h>
 #include <FixedPointsCommon.h>
+
+
 
 void printVector(SQ15x16 v[],int length)
 {
@@ -27,11 +32,30 @@ void printVector(SQ15x16 v[],int length)
    Serial.println();
 }
 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 void setup() {
   Serial.begin(115200);
   Serial.println("START");  
+  
+  pinMode(BlueLed,OUTPUT);
+  pinMode(RedLed,OUTPUT);
+  digitalWrite(BlueLed,HIGH);
+  digitalWrite(RedLed,HIGH);
+  delay(1000);
+  digitalWrite(BlueLed,LOW);
+  digitalWrite(RedLed,LOW);
+  delay(1000);
+  
   SetupBasisVectors();
   SetupDma();
+
+  // initialize the LCD
+  lcd.begin();
+  // Turn on the blacklight and print a message.
+  lcd.backlight();
+  lcd.print("Starting...");
+  lcd.setCursor(0,1);
 }
 
 void loop() {

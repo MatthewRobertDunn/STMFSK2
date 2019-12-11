@@ -48,10 +48,19 @@ void DmaIRQ(void) {
     if(result > 0.05)
     {
       onBitReceived(1, Clock);
+      digitalWrite(BlueLed,LOW);
+      digitalWrite(RedLed,HIGH);
     }
     else if(result < -0.05)
     {
       onBitReceived(0, Clock);
+      digitalWrite(BlueLed,HIGH);
+      digitalWrite(RedLed,LOW);
+    }
+    else
+    {
+      digitalWrite(RedLed,LOW);
+      digitalWrite(BlueLed,LOW);
     }
     
     bufr = (bufr+1)%2;
